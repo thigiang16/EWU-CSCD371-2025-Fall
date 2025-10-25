@@ -1,4 +1,6 @@
-﻿namespace GenericsHomework
+﻿using System.Runtime.Intrinsics.Arm;
+
+namespace GenericsHomework
 {
     public class Node<T>
     {
@@ -18,11 +20,18 @@
 
         public void Append(T value)
         {
-            var newNode = new Node<T>(value);
-            newNode.Next = this.Next;
+            Node<T> current = this;
+            do
+            {
+                if (Equals(current.Value, value))
+                    throw new InvalidOperationException("Duplicate value detected");
+                current = current.Next;
+            }while (current != this);
+
+            var newNode = new Node<T>(value) { Next = this.Next };
             this.Next = newNode;
         }
 
-        public 
+         
     }
 }
