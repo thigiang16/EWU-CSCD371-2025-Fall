@@ -15,5 +15,14 @@
         {
             return Value?.ToString() ?? "null";
         }
+
+        public void Append(T value)
+        {
+            var newNode = new Node<T>(value);
+            newNode.Next = this.Next;
+            this.Next = newNode;
+        }
+
+        public 
     }
 }
