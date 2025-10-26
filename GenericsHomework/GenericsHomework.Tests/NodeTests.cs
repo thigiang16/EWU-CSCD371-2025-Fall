@@ -100,5 +100,18 @@ namespace GenericsHomework.Tests
             Assert.AreEqual<int>(5, node.Next.Next.Value);
             Assert.AreEqual<Node<int>>(node, node.Next.Next.Next);
         }
+
+        [TestMethod]
+        public void Add_And_Contains_WorkCorrectly()
+        {
+            var circle = new Circle<string>("Fruits");
+
+            circle.Add("Apple");
+            circle.Add("Banana");
+
+            Assert.IsTrue(circle.Contains("Apple"));
+            Assert.IsTrue(circle.Contains("Banana"));
+            Assert.IsFalse(circle.Contains("Orange"));
+        }
     }
 }
