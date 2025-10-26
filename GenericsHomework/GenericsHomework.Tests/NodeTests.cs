@@ -36,6 +36,15 @@ namespace GenericsHomework.Tests
         }
 
         [TestMethod]
+        public void Append_DuplicateValue_ThrowsInvalidOperationException()
+        {
+            var node = new Node<int>(1);
+            node.Append(2);
+
+            Assert.ThrowsException<InvalidOperationException>(() => node.Append(2));
+        }
+
+        [TestMethod]
         public void Exists_FindsValuesCorrectly()
         {
             var node = new Node<int>(10);

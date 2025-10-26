@@ -36,6 +36,11 @@ namespace GenericsHomework
         /// Removes all nodes from the circular list except the current node.
         /// After this call the current node will point to itself (a single-node circular list).
         /// </summary>
+
+        //Note: Garbage Collection in .NET is automatic and can detect, clean up cyclic references
+        //Therefore, although the nodes form a circular list,
+        //we don't need to manually break the loop for memory management
+
         public void Clear()
         {
             //if this is already a single-node list nothing to do
