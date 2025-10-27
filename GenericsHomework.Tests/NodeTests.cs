@@ -2,8 +2,8 @@
 using System;
 using GenericsHomework;
 
-namespace GenericsHomework.Tests
-{
+namespace GenericsHomework.Tests;
+
     [TestClass]
     public sealed class NodeTests
     {
@@ -102,4 +102,4 @@ namespace GenericsHomework.Tests
         }
 
     }
-}
+

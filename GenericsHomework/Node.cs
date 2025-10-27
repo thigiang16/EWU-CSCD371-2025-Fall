@@ -1,7 +1,7 @@
 ﻿using System;
 
-namespace GenericsHomework
-{
+namespace GenericsHomework;
+
     public class Node<T>
     {
         public T Value { get; }
@@ -80,4 +80,4 @@ namespace GenericsHomework
             return false;
         }
     }
-}
+
