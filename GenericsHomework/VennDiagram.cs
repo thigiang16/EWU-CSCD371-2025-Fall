@@ -34,6 +34,23 @@ public class VennDiagram<T> where T : class
         return sharedItems;
     }
 
+    //Get all items
+    public IEnumerable<T> GetUnion(params string[] circleNames)
+    {
+        var selectedCircles = _circles
+            .Where(c => circleNames.Contains(c.Name))
+            .ToList();
+
+        if(selectedCircles.Count == 0) return Enumerable.Empty<T>();
+        var union = new HashSet<T>(selectedCircles[0].GetItems());
+
+        foreach (var circle in selectedCircles)
+        {
+            union.UnionWith(circle.GetItems());
+        }
+        return union;
+    }
+
 }
 
 
