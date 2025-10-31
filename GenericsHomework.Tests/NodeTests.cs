@@ -65,23 +65,17 @@ namespace GenericsHomework.Tests;
             node.Append(3);
             node.Append(4);
 
-            //capture a removed node reference (node.Next is the most recently appended)
             var removed = node.Next;
 
             node.Clear();
 
-            //original node should be isolated
             Assert.AreEqual<Node<int>>(node, node.Next);
             Assert.IsFalse(node.Exists(2));
             Assert.IsFalse(node.Exists(3));
             Assert.IsFalse(node.Exists(4));
 
-            //removed nodes should form their own circular list (preserve relative order).
-            //After appending 2,3,4 the insertion order around the removed list is:
-            //removed (4) -> 3 -> 2 -> removed (4)
             Assert.AreEqual<int>(3, removed.Next.Value);
             Assert.AreEqual<int>(2, removed.Next.Next.Value);
-            //loop closes back to the captured removed node
             Assert.AreEqual<Node<int>>(removed, removed.Next.Next.Next);
         }
 
@@ -101,5 +95,13 @@ namespace GenericsHomework.Tests;
             Assert.AreEqual<Node<int>>(node, node.Next.Next.Next);
         }
 
+            [TestMethod]
+        public void Exists_NonExistingValue_ReturnsFalse()
+        {
+            var node = new Node<int>(1);
+            node.Append(2);
+            node.Append(3);
+            Assert.IsFalse(node.Exists(42));
+        }
     }
 
