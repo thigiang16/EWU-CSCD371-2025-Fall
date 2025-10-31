@@ -32,11 +32,6 @@ namespace GenericsHomework;
             this.Next = newNode;
         }
 
-        /// <summary>
-        /// Removes all nodes from the circular list except the current node.
-        /// After this call the current node will point to itself.
-        /// </summary>
-
         public void Clear()
         {
             if (this.Next == this)
@@ -55,9 +50,6 @@ namespace GenericsHomework;
             this.Next = this;
         }
 
-        /// <summary>
-        /// Returns true if the provided value exists in the circular list (compares with object.Equals).
-        /// </summary>
         public bool Exists(T value)
         {
             Node<T> current = this;

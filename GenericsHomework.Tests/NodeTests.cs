@@ -10,7 +10,7 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void Constructor_ValidInitialization_SelfReferences()
         {
-            var node = new Node<int>(5);
+            Node<int> node = new Node<int>(5);
             Assert.AreEqual<int>(5, node.Value);
             Assert.AreEqual<Node<int>>(node,node.Next);
         }
@@ -18,16 +18,16 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void ToString_ValueGiven_ReturnsValueAsString()
         {
-            var node = new Node<string>("Hello");
+            Node<string> node = new Node<string>("Hello");
             Assert.AreEqual<string>("Hello", node.ToString());
         }
 
         [TestMethod]
         public void Append_ValidValue_NodeAppendedAfterCurrent()
         {
-            var node1 = new Node<int>(1);
+            Node<int> node1 = new Node<int>(1);
             node1.Append(2);
-            var node2 = node1.Next;
+            Node<int> node2 = node1.Next;
 
 
             Assert.AreEqual<int>(2, node2.Value);
@@ -38,7 +38,7 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void Append_DuplicateValue_ThrowsInvalidOperationException()
         {
-            var node = new Node<int>(1);
+            Node<int> node = new Node<int>(1);
             node.Append(2);
 
             Assert.ThrowsException<InvalidOperationException>(() => node.Append(2));
@@ -47,7 +47,7 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void Exists_ExistingValue_FindsValue()
         {
-            var node = new Node<int>(10);
+            Node<int> node = new Node<int>(10);
             node.Append(20);
             node.Append(30);
 
@@ -60,12 +60,12 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void Clear_MultipleNodes_RemovesAllExceptCurrent()
         {
-            var node = new Node<int>(1);
+            Node<int> node = new Node<int>(1);
             node.Append(2);
             node.Append(3);
             node.Append(4);
 
-            var removed = node.Next;
+            Node<int> removed = node.Next;
 
             node.Clear();
 
@@ -82,7 +82,7 @@ namespace GenericsHomework.Tests;
         [TestMethod]
         public void Clear_AfterClear_CanAppendNewValues()
         {
-            var node = new Node<int>(1);
+            Node<int> node = new Node<int>(1);
             node.Append(2);
             node.Append(3);
 
@@ -98,7 +98,7 @@ namespace GenericsHomework.Tests;
             [TestMethod]
         public void Exists_NonExistingValue_ReturnsFalse()
         {
-            var node = new Node<int>(1);
+            Node<int> node = new Node<int>(1);
             node.Append(2);
             node.Append(3);
             Assert.IsFalse(node.Exists(42));
