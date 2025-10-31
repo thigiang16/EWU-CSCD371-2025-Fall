@@ -8,7 +8,7 @@ namespace GenericsHomework.Tests;
     public sealed class NodeTests
     {
         [TestMethod]
-        public void Constructor_ShouldInitializeValueandSelfReference()
+        public void Constructor_ValidInitialization_SelfReferences()
         {
             var node = new Node<int>(5);
             Assert.AreEqual<int>(5, node.Value);
@@ -45,7 +45,7 @@ namespace GenericsHomework.Tests;
         }
 
         [TestMethod]
-        public void Exists_FindsValuesCorrectly()
+        public void Exists_ExistingValue_FindsValue()
         {
             var node = new Node<int>(10);
             node.Append(20);
