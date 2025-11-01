@@ -29,7 +29,7 @@ public class ProgramTests
         {
             ReadLine = () => input.Dequeue()
         };
-        string result = io.ReadLine();
+        string? result = io.ReadLine();
         Assert.AreEqual<string>("Hi", result);
     }
 }
