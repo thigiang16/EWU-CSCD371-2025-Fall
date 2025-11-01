@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Calculate.Tests/Calculate.Tests.csproj" Id="314c6994-7df1-4243-855e-931b10933634" />
   <Project Path="Calculate/Calculate.csproj" />
 </Solution>
