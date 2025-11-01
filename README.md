@@ -11,9 +11,9 @@ Chapter 15: Collection Interfaces with Standard Query Operators
 
 ## Instructions
 
-- Create a *Console* project called "Calculate.". ❌✔
+- Create a *Console* project called "Calculate.". ✔
 - Define a Program Class
-  - Define two init-only setter properties, `WriteLine` and `ReadLine`, that contain delegates for writing a line of text and reading a line of text respectively ❌✔
+  - Define two init-only setter properties, `WriteLine` and `ReadLine`, that contain delegates for writing a line of text and reading a line of text respectively ✔
   - Write a test that sets these properties at construction time and then invokes the properties and verifies the expected behavior occurs. ❌✔
   - Set the default behavior for the `WriteLine` and `ReadLine` properties to invoke `System.Console` versions of the methods and add an empty default constructor. ❌✔
 - Define a Calculator class ❌✔
@@ -42,10 +42,10 @@ Do one of the following two options (or both if you want extra, extra credit) :)
 
 - Place all shared project properties into a `Directory.Build.props` file.
 - Place all shared project items into a `Directory.Build.targets` file. (optional)
-- nullable reference types is enabled  ❌✔
-- Ensure that you turn on code analysis for all projects(EnableNETAnalyzers)  ❌✔
-- Set LangVersion and the TargetFramework to the latest released versions available (preview versions optional)   ❌✔
-- and enabled .NET analyzers for both projects ❌✔
+- nullable reference types is enabled  ✔
+- Ensure that you turn on code analysis for all projects(EnableNETAnalyzers)  ✔
+- Set LangVersion and the TargetFramework to the latest released versions available (preview versions optional)   ✔
+- and enabled .NET analyzers for both projects ✔
 - For this assignment, always use `Assert.AreEqual<T>()` (the generic version)  ❌✔
 - All of the above should be unit tested ❌✔
 - Choose simplicity over complexity ❌✔
