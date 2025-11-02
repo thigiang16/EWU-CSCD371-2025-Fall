@@ -2,15 +2,33 @@
 public class Program
 {
     public Action<string> WriteLine { get; init; } = Console.WriteLine!;
-    public Func<string> ReadLine { get; init; } = Console.ReadLine!;
+    public Func<string?> ReadLine { get; init; } = Console.ReadLine!;
 
     public Program() { }
 
     public static void Main()
     {
         Program program = new();
-        program.WriteLine("Type something and press Enter:");
+        Calculator calculator = new();
+
+        program.WriteLine("Enter calculation (examples: 3 + 4 or 2 - 5)");
+        program.WriteLine("Make sure there is a space between each input:");
+
         string? input = program.ReadLine();
-        program.WriteLine("You typed: " + input);
+
+        if (input is null)
+        {
+            program.WriteLine("There wasn't any input");
+            return;
+        }
+
+        if (calculator.TryCalculate(input, out double result))
+        {
+            program.WriteLine($"The result is: {result}");
+        }
+        else
+        {
+            program.WriteLine("Something went wrong with the calculation");
+        }
     }
 }

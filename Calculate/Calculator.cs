@@ -26,4 +26,49 @@ public class Calculator
             {'*', Multiple },
             {'/', Divide }
         };
+
+    public bool TryCalculate(string calculation, out double result)
+    {
+        result = 0.0;
+
+        if (string.IsNullOrWhiteSpace(calculation))
+        {
+            return false;
+        }
+
+        string[] parts = calculation.Split(' ');
+        if (parts.Length != 3)
+        {
+            return false;
+        }
+
+        string leftTemp = parts[0];
+        string opTemp = parts[1];
+        string rightTemp = parts[2];
+
+        if (opTemp.Length != 1)
+        {
+            return false;
+        }
+
+        if (!int.TryParse(leftTemp, out int left) || !int.TryParse(rightTemp, out int right))
+        {
+            return false;
+        }
+
+        char op = opTemp[0];
+
+        if (!MathematicalOperations.TryGetValue(op, out var operation))
+        {
+            return false;
+        }
+
+        if (op == '/' && right == 0)
+        {
+            return false;
+        }
+
+        result = operation(left, right);
+        return true;
+    }
 }
