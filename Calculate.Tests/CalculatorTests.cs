@@ -13,6 +13,33 @@ public class CalculatorTests
     }
 
     [TestMethod]
+    public void TryCalculate_Subtraction_ReturnsExpectedResult()
+    {
+        Calculator calc = new();
+        bool ok = calc.TryCalculate("10 - 7", out double result);
+        Assert.IsTrue(ok);
+        Assert.AreEqual<double>(3, result);
+    }
+
+    [TestMethod]
+    public void TryCalculate_Multiplication_ReturnsExpectedResult()
+    {
+        Calculator calc = new();
+        bool ok = calc.TryCalculate("2 * 7", out double result);
+        Assert.IsTrue(ok);
+        Assert.AreEqual<double>(14, result);
+    }
+
+    [TestMethod]
+    public void TryCalculate_Division_ReturnsExpectedResult()
+    {
+        Calculator calc = new();
+        bool ok = calc.TryCalculate("10 / 5", out double result);
+        Assert.IsTrue(ok);
+        Assert.AreEqual<double>(2, result);
+    }
+
+    [TestMethod]
     public void TryCalculate_NoSpacesAroundOperator_ReturnsFalse()
     {
         Calculator calc = new();
@@ -35,4 +62,6 @@ public class CalculatorTests
         bool temp = calc.TryCalculate("10 / 0", out double result);
         Assert.IsFalse(temp);
     }
+
+    
 }
