@@ -22,13 +22,13 @@ Chapter 15: Collection Interfaces with Standard Query Operators
     - is initialized to a `System.Collections.Generics.Dictionary<<TKey,TValue>` instance that. ✔
       - Uses `char` for the key corresponding to the operators +, -, *, and /. ✔
       - Has values that correspond with the Add, Subtract, Multiple, and Divide methods. ✔
-  - Implement a `TryCalculate` method following "TryParse" pattern ❌✔
-    - Valid `calculation` expressions include such strings as "3 + 4", "42 - 2", etc. ❌✔
-    - If there is no whitespace around the operator, you can assume the `calculation` is invalid and return false. Similarly if the operands are not integers. ❌✔
-    - Use `string.Split()`, pattern matching, logical and operators to parse the string in their entirety ❌✔
-    - Index into the `MathematicalOperations` method using the operator parsed during pattern matching to find the corresponding implementation and invoke it. ❌✔
-- Implement the Program class to instantiate the calculator and invoke it based on user input from the console. ❌✔
-- Be sure to use the `WriteLine`/`ReadLine` properties on `Program` for testing the input and output of your program. ❌✔
+  - Implement a `TryCalculate` method following "TryParse" pattern ✔
+    - Valid `calculation` expressions include such strings as "3 + 4", "42 - 2", etc. ✔
+    - If there is no whitespace around the operator, you can assume the `calculation` is invalid and return false. Similarly if the operands are not integers. ✔
+    - Use `string.Split()`, pattern matching, logical and operators to parse the string in their entirety ✔
+    - Index into the `MathematicalOperations` method using the operator parsed during pattern matching to find the corresponding implementation and invoke it. ✔
+- Implement the Program class to instantiate the calculator and invoke it based on user input from the console. ✔
+- Be sure to use the `WriteLine`/`ReadLine` properties on `Program` for testing the input and output of your program. ✔
 
 ## Extra Credit
 
