@@ -1,5 +1,7 @@
-﻿namespace Calculate;
-public class Program:ProgramBase
+﻿using ConsoleUtilities;
+
+namespace Calculate;
+public class Program : ProgramBase
 {
     public static void Main()
     {
