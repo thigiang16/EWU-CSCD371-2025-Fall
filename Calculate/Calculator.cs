@@ -9,7 +9,6 @@ namespace Calculate;
 
 public class Calculator
 {
-    
     public static double Add(double a, double b) => a + b;
     public static double Subtract(double a, double b) => a - b;
     public static double Multiple(double  a, double b ) => a * b;
@@ -18,4 +17,13 @@ public class Calculator
         if (b == 0) throw new DivideByZeroException("Cannot divide by zero");
         return a / b;
     }
+
+    public IReadOnlyDictionary<char, Func<double, double, double>> MathematicalOperations { get; }
+        = new Dictionary<char, Func<double, double, double>>
+        {
+            {'+', Add },
+            {'-', Subtract },
+            {'*', Multiple },
+            {'/', Divide }
+        };
 }
