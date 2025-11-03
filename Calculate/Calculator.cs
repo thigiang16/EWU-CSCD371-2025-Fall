@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,22 +10,22 @@ namespace Calculate;
 
 public class Calculator
 {
-    public static double Add(double a, double b) => a + b;
-    public static double Subtract(double a, double b) => a - b;
-    public static double Multiple(double  a, double b ) => a * b;
-    public static double Divide(double a, double b)
+    public static T Add<T>(T a, T b) where T : INumber<T> => a + b;
+    public static T Subtract<T>(T a, T b) where T : INumber<T> => a - b;
+    public static T Multiple<T>(T a, T b ) where T : INumber<T> => a * b;
+    public static T Divide<T>(T a, T b) where T : INumber<T>
     {
-        if (b == 0) throw new DivideByZeroException("Cannot divide by zero");
+        if (b == T.Zero) throw new DivideByZeroException("Cannot divide by zero");
         return a / b;
     }
 
-    public IReadOnlyDictionary<char, Func<double, double, double>> MathematicalOperations { get; }
-        = new Dictionary<char, Func<double, double, double>>
+    public IReadOnlyDictionary<char, Func<T, T, T>> MathematicalOperations<T>() where T : INumber<T>
+        => new Dictionary<char, Func<T, T, T>>
         {
-            {'+', Add },
-            {'-', Subtract },
-            {'*', Multiple },
-            {'/', Divide }
+            {'+', Add<T> },
+            {'-', Subtract<T> },
+            {'*', Multiple<T> },
+            {'/', Divide<T> }
         };
 
     public bool TryCalculate(string calculation, out double result)
@@ -58,7 +59,8 @@ public class Calculator
 
         char op = opTemp[0];
 
-        if (!MathematicalOperations.TryGetValue(op, out var operation))
+        var operations = MathematicalOperations<int>();
+        if (!operations.TryGetValue(op, out var operation))
         {
             return false;
         }
