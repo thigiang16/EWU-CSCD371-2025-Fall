@@ -1,9 +1,8 @@
-﻿namespace ConsoleUtilities
+﻿namespace ConsoleUtilities;
+
+public class ProgramBase
 {
-    public class ProgramBase
-    {
-        public Action<string> WriteLine { get; init; } = Console.WriteLine!;
-        public Func<string?> ReadLine { get; init; } = Console.ReadLine!;
-        public ProgramBase() { }
-    }
+    public Action<string> WriteLine { get; init; } = Console.WriteLine!;
+    public Func<string?> ReadLine { get; init; } = Console.ReadLine!;
+    public ProgramBase() { }
 }
