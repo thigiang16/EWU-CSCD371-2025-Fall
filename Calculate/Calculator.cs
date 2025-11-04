@@ -19,7 +19,7 @@ public class Calculator
         return a / b;
     }
 
-    public IReadOnlyDictionary<char, Func<T, T, T>> MathematicalOperations<T>() where T : INumber<T>
+    public static IReadOnlyDictionary<char, Func<T, T, T>> MathematicalOperations<T>() where T : INumber<T>
         => new Dictionary<char, Func<T, T, T>>
         {
             {'+', Add<T> },
