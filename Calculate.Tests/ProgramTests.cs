@@ -7,29 +7,33 @@ namespace Calculate.Tests;
 [TestClass]
 public class ProgramTests
 {
+
     [TestMethod]
     public void WriteLine_WorkAsExpected()
     {
-        List<string> output = new();
-        Program io = new Program
+        string output = string.Empty;
+        var program = new Program
         {
-            WriteLine = (s) => output.Add(s)
+            WriteLine = s => output = s
         };
-        io.WriteLine("Hello World!");
-
-        Assert.HasCount(1, output);
-        Assert.AreEqual<string>("Hello World!", output[0]);
+        string input = "Hello World!";
+        
+        program.WriteLine(input);
+  
+        Assert.AreEqual<string>(input, output);
     }
 
     [TestMethod]
     public void ReadLine_WorkAsExpected()
     {
-        Queue<string> input = new(new[] { "Hi" });
-        Program io = new Program
+        string input = "Hello";
+        var program = new Program
         {
-            ReadLine = () => input.Dequeue()
+            ReadLine = () => input
         };
-        string? result = io.ReadLine();
-        Assert.AreEqual<string>("Hi", result);
+
+        string? receivedInput = program.ReadLine();
+
+        Assert.AreEqual<string>(input, receivedInput);
     }
 }
