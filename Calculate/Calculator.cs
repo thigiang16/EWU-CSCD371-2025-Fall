@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -51,13 +52,13 @@ public class Calculator
         {
             if (typeof(T) == typeof(int))
             {
-                left = (T)(object)int.Parse(leftTemp);
-                right = (T)(object)int.Parse(rightTemp);
+                left = (T)(object)int.Parse(leftTemp, CultureInfo.InvariantCulture);
+                right = (T)(object)int.Parse(rightTemp, CultureInfo.InvariantCulture);
             }
             else if (typeof(T) == typeof(double))
             {
-                left = (T)(object)double.Parse(leftTemp);
-                right = (T)(object)double.Parse(rightTemp);
+                left = (T)(object)double.Parse(leftTemp, CultureInfo.InvariantCulture);
+                right = (T)(object)double.Parse(rightTemp, CultureInfo.InvariantCulture);
             }
             else return false;
         }
