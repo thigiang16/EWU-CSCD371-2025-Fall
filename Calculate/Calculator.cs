@@ -28,7 +28,7 @@ public class Calculator
             {'/', Divide<T> }
         };
 
-    public bool TryCalculate(string calculation, out double result)
+    public static bool TryCalculate(string calculation, out double result)
     {
         result = 0.0;
 

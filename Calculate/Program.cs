@@ -19,7 +19,7 @@ public class Program : ProgramBase
             return;
         }
 
-        if (calculator.TryCalculate(input, out double result))
+        if (Calculator.TryCalculate(input, out double result))
         {
             program.WriteLine($"The result is: {result}");
         }
