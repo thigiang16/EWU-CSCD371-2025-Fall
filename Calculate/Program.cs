@@ -19,9 +19,13 @@ public class Program : ProgramBase
             return;
         }
 
-        if (Calculator.TryCalculate(input, out double result))
+        if (Calculator.TryCalculate<int>(input, out int intResult))
         {
-            program.WriteLine($"The result is: {result}");
+            program.WriteLine($"The result is: {intResult}");
+        }
+        else if (Calculator.TryCalculate<double>(input, out double doubleResult))
+        {
+            program.WriteLine($"The result is: {doubleResult}");
         }
         else
         {
