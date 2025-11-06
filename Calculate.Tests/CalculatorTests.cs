@@ -1,4 +1,6 @@
-﻿namespace Calculate.Tests;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Calculate.Tests;
 
 [TestClass]
 public class CalculatorTests

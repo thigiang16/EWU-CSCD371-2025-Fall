@@ -1,16 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	
 
-  <ItemGroup>
-    <PackageReference Include="MSTest" Version="4.0.0-preview.25465.3" />
-  </ItemGroup>
+	<PropertyGroup>
+		<RootNamespace>Calculate.Tests</RootNamespace>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Calculate\Calculate.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Calculate\Calculate.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="MSTest.TestAdapter" Version="3.6.2" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.6.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+	</ItemGroup>
 
 </Project>
