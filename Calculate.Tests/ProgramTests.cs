@@ -43,7 +43,7 @@ public class ProgramTests
     [TestMethod]
     public void Main_ValidIntegerCalculation_PrintsResult()
     {
-        string input = "3 + 3";
+        string input = "3 + 3\n";
         string output = RunProgramWithInput(input);
         StringAssert.Contains(output, "The result is: 6");
     }
