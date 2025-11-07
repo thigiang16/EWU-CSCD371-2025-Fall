@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<RootNamespace>Calculate.Tests</RootNamespace>
 		<IsTestProject>true</IsTestProject>
-		<TargetFramework>net9.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
