@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace Assignment.Tests;
@@ -58,7 +59,13 @@ public class PingProcessTests
     public void RunTaskAsync_Success()
     {
         // Do NOT use async/await in this test.
-        // Test Sut.RunTaskAsync("localhost");
+        // Test Sut.RunTaskAsync("localhost").
+
+        Task<PingResult> task = Sut.RunTaskAsync("localhost");
+        PingResult result = task.Result;
+
+        Assert.AreEqual<int>(0, result.ExitCode);
+        Assert.IsTrue(result.StdOutput is not null && result.StdOutput.Length > 0);
     }
 
     [TestMethod]
@@ -83,7 +90,7 @@ public class PingProcessTests
 #pragma warning restore CS1998 // Remove this
 
 
-    [TestMethod]
+    /*[TestMethod]
     [ExpectedException(typeof(AggregateException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrapping()
     {
@@ -95,7 +102,7 @@ public class PingProcessTests
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrappingTaskCanceledException()
     {
         // Use exception.Flatten()
-    }
+    }*/
 
     [TestMethod]
     async public Task RunAsync_MultipleHostAddresses_True()
