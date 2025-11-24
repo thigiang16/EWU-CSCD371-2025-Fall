@@ -88,7 +88,7 @@ public class PingProcessTests
     }
 
 
-    /*[TestMethod]
+    [TestMethod]
     [ExpectedException(typeof(AggregateException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrapping()
     {
@@ -100,7 +100,7 @@ public class PingProcessTests
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrappingTaskCanceledException()
     {
         // Use exception.Flatten()
-    }*/
+    }
 
     [TestMethod]
     async public Task RunAsync_MultipleHostAddresses_True()
