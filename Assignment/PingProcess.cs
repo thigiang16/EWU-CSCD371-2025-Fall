@@ -41,29 +41,44 @@ public class PingProcess
         return result;
     }
 
-    async public Task<PingResult> RunAsync(params string[] hostNameOrAddresses)
+    async public Task<PingResult> RunAsync(
+        IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
-        StringBuilder? stringBuilder = null;
-        ParallelQuery<Task<int>>? all = hostNameOrAddresses.AsParallel().Select(async item =>
-        {
-            Task<PingResult> task = null!;
-            // ...
+        StringBuilder stringBuilder = new();
+        Object lockObject = new ();
 
-            await task.WaitAsync(default(CancellationToken));
-            return task.Result.ExitCode;
-        });
+        IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => 
+            Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                PingResult result = Run(host);
 
-        await Task.WhenAll(all);
-        int total = all.Aggregate(0, (total, item) => total + item.Result);
-        return new PingResult(total, stringBuilder?.ToString());
+                if (!string.IsNullOrEmpty(result.StdOutput))
+                {
+                    lock (lockObject)
+                    {
+                        stringBuilder.Append(result.StdOutput);
+                    }
+                }
+                return result.ExitCode;
+            }, cancellationToken)
+        );
+
+        int[] results = await Task.WhenAll(tasks);
+        int total = results.Sum();
+        return new PingResult(total, stringBuilder.ToString());
     }
 
-    async public Task<PingResult> RunLongRunningAsync(
-        string hostNameOrAddress, CancellationToken cancellationToken = default)
+    public Task<int> RunLongRunningAsync(
+        ProcessStartInfo startInfo, Action<string?>? progressOutput,
+        Action<string?>? progressError, CancellationToken token)
     {
-        Task task = null!;
-        await task;
-        throw new NotImplementedException();
+        return Task.Factory.StartNew(() =>
+        {
+            token.ThrowIfCancellationRequested();
+            Process process = RunProcessInternal(startInfo, progressOutput, progressError, token);
+            return process.ExitCode;
+        }, token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
     }
 
     private Process RunProcessInternal(
