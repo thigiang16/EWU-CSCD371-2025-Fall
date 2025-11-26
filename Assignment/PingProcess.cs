@@ -53,13 +53,13 @@ public class PingProcess
                 cancellationToken.ThrowIfCancellationRequested();
                 PingResult result = Run(host);
 
-                if (!string.IsNullOrEmpty(result.StdOutput))
-                {
                     lock (lockObject)
                     {
-                        stringBuilder.Append(result.StdOutput);
+                        if (!string.IsNullOrEmpty(result.StdOutput))
+                        {
+                            stringBuilder.AppendLine(result.StdOutput.Trim());
+                        }
                     }
-                }
                 return result.ExitCode;
             }, cancellationToken)
         );

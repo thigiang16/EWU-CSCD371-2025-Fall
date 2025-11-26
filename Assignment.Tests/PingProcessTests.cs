@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Assignment.Tests;
@@ -89,17 +90,36 @@ public class PingProcessTests
 
 
     [TestMethod]
-    [ExpectedException(typeof(AggregateException))]
+    //[ExpectedException(typeof(AggregateException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrapping()
     {
-        
+        CancellationTokenSource cts = new();
+        cts.Cancel();
+
+        Assert.Throws<AggregateException>(() =>
+        {
+            Sut.RunAsync("localhost", cts.Token).Wait();
+        });
+
     }
 
     [TestMethod]
-    [ExpectedException(typeof(TaskCanceledException))]
+    //[ExpectedException(typeof(TaskCanceledException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrappingTaskCanceledException()
-    {
+    {   
+        CancellationTokenSource cts = new();
+        cts.Cancel();
+
+        try
+        {
+            Sut.RunAsync("localhost", cts.Token).Wait();
+        }
+        catch (AggregateException ex)
+        {
+            Exception? inner = ex.Flatten().InnerException;
+            Assert.IsInstanceOfType(inner, typeof(TaskCanceledException));
         // Use exception.Flatten()
+        }
     }
 
     [TestMethod]
@@ -114,14 +134,12 @@ public class PingProcessTests
     }
 
     [TestMethod]
-#pragma warning disable CS1998 // Remove this
     async public Task RunLongRunningAsync_UsingTpl_Success()
     {
         PingResult result = default;
         // Test Sut.RunLongRunningAsync("localhost");
         AssertValidPingOutput(result);
     }
-#pragma warning restore CS1998 // Remove this
 
     [TestMethod]
     public void StringBuilderAppendLine_InParallel_IsNotThreadSafe()
