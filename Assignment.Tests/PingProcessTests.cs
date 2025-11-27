@@ -65,8 +65,9 @@ public class PingProcessTests
         Task<PingResult> task = Sut.RunTaskAsync("localhost");
         PingResult result = task.Result;
 
-        Assert.AreEqual<int>(0, result.ExitCode);
-        Assert.IsTrue(result.StdOutput is not null && result.StdOutput.Length > 0);
+        AssertValidPingOutput(result);
+        //Assert.AreEqual<int>(0, result.ExitCode);
+        //Assert.IsTrue(result.StdOutput is not null && result.StdOutput.Length > 0);
     }
 
     [TestMethod]
