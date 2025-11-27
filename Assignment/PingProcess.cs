@@ -74,7 +74,7 @@ public class PingProcess
         return new PingResult(total, stringBuilder.ToString());
     }
 
-    // 4 - other version
+    // 4 - 2nd version
     /*async public Task<PingResult> RunAsync(
         IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
@@ -84,7 +84,7 @@ public class PingProcess
         StringBuilder stringBuilder = new StringBuilder();
         Object lockObject = new Object();
         // Create a task for each host
-        List<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
+        IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             PingResult result = Run(host);
