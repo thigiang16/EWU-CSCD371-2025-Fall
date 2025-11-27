@@ -25,6 +25,7 @@ public class PingProcess
         return new PingResult( process.ExitCode, stringBuilder?.ToString());
     }
 
+    //1
     public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
     {
         return Task.Run(() => 
@@ -32,7 +33,7 @@ public class PingProcess
             return Run(hostNameOrAddress);
         });
     }
-
+    //2, 3
     async public Task<PingResult> RunAsync(
         string hostNameOrAddress, CancellationToken cancellationToken = default)
     {
@@ -44,11 +45,12 @@ public class PingProcess
         return result;
     }
 
+    //4
     async public Task<PingResult> RunAsync(
         IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
-        StringBuilder stringBuilder = new();
-        Object lockObject = new ();
+        StringBuilder? stringBuilder = new();
+        Object lockObject = new();
 
         IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => 
             Task.Run(() =>
@@ -72,16 +74,84 @@ public class PingProcess
         return new PingResult(total, stringBuilder.ToString());
     }
 
-    public Task<int> RunLongRunningAsync(
+    // 4 - other version
+    /*async public Task<PingResult> RunAsync(
+        IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
+    {
+        if (hostNameOrAddresses == null)
+            throw new ArgumentNullException(nameof(hostNameOrAddresses));
+
+        StringBuilder stringBuilder = new StringBuilder();
+        Object lockObject = new Object();
+        // Create a task for each host
+        List<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            PingResult result = Run(host);
+
+            // Thread-safe append to shared StringBuilder
+            string output = result.StdOutput?.Trim() ?? string.Empty;
+            if (!string.IsNullOrEmpty(output))
+            {
+                lock (lockObject)
+                {
+                    stringBuilder.AppendLine(output);
+                }
+            }
+
+            return result.ExitCode;
+        }, cancellationToken)).ToList();
+
+        int[] results = await Task.WhenAll(tasks);
+        int totalExitCode = results.Sum();
+        return new PingResult(totalExitCode, stringBuilder.ToString());
+    }*/
+
+    public Task<PingResult> RunLongRunningAsync(
         ProcessStartInfo startInfo, Action<string?>? progressOutput,
         Action<string?>? progressError, CancellationToken token)
     {
-        return Task.Factory.StartNew(() =>
-        {
+        if (startInfo == null)
+            throw new ArgumentNullException(nameof(startInfo));
+
+        // Use Task.Factory.StartNew for long-running task
+        Task<PingResult> task = Task.Factory.StartNew(() =>
+        { 
             token.ThrowIfCancellationRequested();
-            Process process = RunProcessInternal(startInfo, progressOutput, progressError, token);
-            return process.ExitCode;
+
+            // Capture all output lines
+            StringBuilder stringBuilder = new();
+            void captureOutput(string? line)
+            {
+                if (!string.IsNullOrEmpty(line))
+                {
+                    lock (stringBuilder)
+                    {
+                        stringBuilder.AppendLine(line);
+                    }
+                }
+
+                // Also invoke user-provided callback
+                progressOutput?.Invoke(line);
+            }
+
+            void captureError(string? line)
+            {
+                progressError?.Invoke(line);
+            }
+
+            // Run the process using helper
+            Process process = RunProcessInternal(startInfo, captureOutput, captureError, token);
+
+            // Build PingResult
+            int exitCode = process.ExitCode;
+            string? output = stringBuilder.ToString();
+
+            return new PingResult(exitCode, output);
+
         }, token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+        return task;
     }
 
     private Process RunProcessInternal(

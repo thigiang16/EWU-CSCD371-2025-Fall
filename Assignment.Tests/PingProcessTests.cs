@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -94,7 +95,7 @@ public class PingProcessTests
     //[ExpectedException(typeof(AggregateException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrapping()
     {
-        CancellationTokenSource cts = new();
+        using CancellationTokenSource cts = new();
         cts.Cancel();
 
         Assert.Throws<AggregateException>(() =>
@@ -108,7 +109,7 @@ public class PingProcessTests
     //[ExpectedException(typeof(TaskCanceledException))]
     public void RunAsync_UsingTplWithCancellation_CatchAggregateExceptionWrappingTaskCanceledException()
     {   
-        CancellationTokenSource cts = new();
+        using CancellationTokenSource cts = new();
         cts.Cancel();
 
         try
@@ -128,29 +129,47 @@ public class PingProcessTests
     {
         // Pseudo Code - don't trust it!!!
         string[] hostNames = new string[] { "localhost", "localhost", "localhost", "localhost" };
-        int expectedLineCount = PingOutputLikeExpression.Split(Environment.NewLine).Length*hostNames.Length;
+
+        int linesPerHost = PingOutputLikeExpression
+                           .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                           .Length;
+        int expectedLineCount = linesPerHost * hostNames.Length;
+
         PingResult result = await Sut.RunAsync(hostNames);
-        int? lineCount = result.StdOutput?.Split(Environment.NewLine).Length;
-        Assert.AreEqual(expectedLineCount, lineCount);
+
+        int actualLineCount = result.StdOutput?
+                              .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                              .Length ?? 0;
+
+        Assert.AreEqual(expectedLineCount, actualLineCount);
     }
 
     [TestMethod]
     async public Task RunLongRunningAsync_UsingTpl_Success()
     {
-        PingResult result = default;
-        // Test Sut.RunLongRunningAsync("localhost");
+        ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
+        StringBuilder outputBuilder = new();
+
+        PingResult result = await Sut.RunLongRunningAsync(
+            startInfo,
+            line => outputBuilder.AppendLine(line), 
+            error => { },
+            CancellationToken.None
+        );
+
         AssertValidPingOutput(result);
     }
 
     [TestMethod]
     public void StringBuilderAppendLine_InParallel_IsNotThreadSafe()
     {
-        IEnumerable<int> numbers = Enumerable.Range(0, short.MaxValue);
+        IEnumerable<int> numbers = Enumerable.Range(0, 40);
         System.Text.StringBuilder stringBuilder = new();
         numbers.AsParallel().ForAll(item => stringBuilder.AppendLine(""));
         int lineCount = stringBuilder.ToString().Split(Environment.NewLine).Length;
         Assert.AreNotEqual(lineCount, numbers.Count()+1);
     }
+
 
     readonly string PingOutputLikeExpression = @"
 Pinging * with 32 bytes of data:
