@@ -90,12 +90,11 @@ public class PingProcess
 
             // Capture all output lines
             StringBuilder stringBuilder = new();
-            Object lockObject = new();
             void captureOutput(string? line)
             {
                 if (!string.IsNullOrEmpty(line))
                 {
-                    lock (lockObject)
+                    lock (stringBuilder)
                     {
                         stringBuilder.AppendLine(line);
                     }
