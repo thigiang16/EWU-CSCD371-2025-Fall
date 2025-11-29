@@ -49,47 +49,16 @@ public class PingProcess
     async public Task<PingResult> RunAsync(
         IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
-        StringBuilder? stringBuilder = new();
-        Object lockObject = new();
-
-        IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => 
-            Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                PingResult result = Run(host);
-
-                    lock (lockObject)
-                    {
-                        if (!string.IsNullOrEmpty(result.StdOutput))
-                        {
-                            stringBuilder.AppendLine(result.StdOutput.Trim());
-                        }
-                    }
-                return result.ExitCode;
-            }, cancellationToken)
-        );
-
-        int[] results = await Task.WhenAll(tasks);
-        int total = results.Sum();
-        return new PingResult(total, stringBuilder.ToString());
-    }
-
-    // 4 - 2nd version
-    /*async public Task<PingResult> RunAsync(
-        IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
-    {
         if (hostNameOrAddresses == null)
             throw new ArgumentNullException(nameof(hostNameOrAddresses));
 
         StringBuilder stringBuilder = new StringBuilder();
         Object lockObject = new Object();
-        // Create a task for each host
         IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             PingResult result = Run(host);
 
-            // Thread-safe append to shared StringBuilder
             string output = result.StdOutput?.Trim() ?? string.Empty;
             if (!string.IsNullOrEmpty(output))
             {
@@ -105,7 +74,7 @@ public class PingProcess
         int[] results = await Task.WhenAll(tasks);
         int totalExitCode = results.Sum();
         return new PingResult(totalExitCode, stringBuilder.ToString());
-    }*/
+    }
 
     public Task<PingResult> RunLongRunningAsync(
         ProcessStartInfo startInfo, Action<string?>? progressOutput,
@@ -121,11 +90,12 @@ public class PingProcess
 
             // Capture all output lines
             StringBuilder stringBuilder = new();
+            Object lockObject = new();
             void captureOutput(string? line)
             {
                 if (!string.IsNullOrEmpty(line))
                 {
-                    lock (stringBuilder)
+                    lock (lockObject)
                     {
                         stringBuilder.AppendLine(line);
                     }

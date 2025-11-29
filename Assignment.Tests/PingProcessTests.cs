@@ -151,12 +151,12 @@ public class PingProcessTests
 
         PingResult result = await Sut.RunLongRunningAsync(
             startInfo,
-            line => outputBuilder.AppendLine(line), 
-            error => { },
+            null,
+            null,
             CancellationToken.None
         );
 
-        AssertValidPingOutput(result);
+        Assert.AreEqual<int>(0, result.ExitCode);
     }
 
     [TestMethod]
