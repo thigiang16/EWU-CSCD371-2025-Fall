@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -67,8 +68,6 @@ public class PingProcessTests
         PingResult result = task.Result;
 
         AssertValidPingOutput(result);
-        //Assert.AreEqual<int>(0, result.ExitCode);
-        //Assert.IsTrue(result.StdOutput is not null && result.StdOutput.Length > 0);
     }
 
     [TestMethod]
@@ -177,6 +176,21 @@ public class PingProcessTests
         }
     }
 
+    [TestMethod]
+    public async Task RunAsync_WithProgress_ReportsLines()
+    {
+        List<string?> reported = new();
+        var progress = new Progress<string?>(s => reported.Add(s));
+
+        PingResult result = await Sut.RunAsync(progress);
+
+        Assert.IsNotEmpty(reported);
+        
+        AssertValidPingOutput(result);
+    }
+
+ 
+
 
     readonly string PingOutputLikeExpression = @"
 Pinging * with 32 bytes of data:
@@ -200,3 +214,5 @@ Approximate round trip times in milli-seconds:
     private void AssertValidPingOutput(PingResult result) =>
         AssertValidPingOutput(result.ExitCode, result.StdOutput);
 }
+
+

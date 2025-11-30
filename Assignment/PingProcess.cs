@@ -123,6 +123,34 @@ public class PingProcess
         return task;
     }
 
+    // extra credit
+    public async Task<PingResult> RunAsync(IProgress<string?> progress)
+    {
+        if (progress == null) throw new ArgumentNullException(nameof(progress));
+
+        StringBuilder outputBuilder = new();
+        void captureLine(string? line)
+        {
+            if (!string.IsNullOrEmpty(line))
+            {
+                lock (outputBuilder)
+                {
+                    outputBuilder.AppendLine(line.TrimEnd()); 
+                }
+            }
+            progress.Report(line);
+        }
+
+        return await Task.Run(() =>
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
+            Process process = RunProcessInternal(startInfo, captureLine, null, default);
+
+            return new PingResult(process.ExitCode, outputBuilder.ToString().Trim());
+        });
+    }
+
+
     private Process RunProcessInternal(
         ProcessStartInfo startInfo,
         Action<string?>? progressOutput,
