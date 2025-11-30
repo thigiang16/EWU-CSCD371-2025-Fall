@@ -20,15 +20,15 @@ public class PingProcess
         StartInfo.Arguments = hostNameOrAddress;
         StringBuilder? stringBuilder = null;
         void updateStdOutput(string? line) =>
-            (stringBuilder??=new StringBuilder()).AppendLine(line);
+            (stringBuilder ??= new StringBuilder()).AppendLine(line);
         Process process = RunProcessInternal(StartInfo, updateStdOutput, default, default);
-        return new PingResult( process.ExitCode, stringBuilder?.ToString());
+        return new PingResult(process.ExitCode, stringBuilder?.ToString());
     }
 
     //1
     public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
     {
-        return Task.Run(() => 
+        return Task.Run(() =>
         {
             return Run(hostNameOrAddress);
         });
@@ -85,7 +85,7 @@ public class PingProcess
 
         // Use Task.Factory.StartNew for long-running task
         Task<PingResult> task = Task.Factory.StartNew(() =>
-        { 
+        {
             token.ThrowIfCancellationRequested();
 
             // Capture all output lines
@@ -131,13 +131,14 @@ public class PingProcess
         StringBuilder outputBuilder = new();
         void captureLine(string? line)
         {
-            if (!string.IsNullOrEmpty(line))
+            if (line is null)
+                return;
+
+            lock (outputBuilder)
             {
-                lock (outputBuilder)
-                {
-                    outputBuilder.AppendLine(line.TrimEnd()); 
-                }
+                outputBuilder.AppendLine(line);
             }
+
             progress.Report(line);
         }
 
@@ -146,7 +147,7 @@ public class PingProcess
             ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
             Process process = RunProcessInternal(startInfo, captureLine, null, default);
 
-            return new PingResult(process.ExitCode, outputBuilder.ToString().Trim());
+            return new PingResult(process.ExitCode, outputBuilder.ToString());
         });
     }
 
