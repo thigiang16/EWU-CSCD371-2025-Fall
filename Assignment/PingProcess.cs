@@ -25,7 +25,6 @@ public class PingProcess
         return new PingResult(process.ExitCode, stringBuilder?.ToString());
     }
 
-    //1
     public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
     {
         return Task.Run(() =>
@@ -33,7 +32,7 @@ public class PingProcess
             return Run(hostNameOrAddress);
         });
     }
-    //2, 3
+    
     async public Task<PingResult> RunAsync(
         string hostNameOrAddress, CancellationToken cancellationToken = default)
     {
@@ -45,7 +44,6 @@ public class PingProcess
         return result;
     }
 
-    //4
     async public Task<PingResult> RunAsync(
         IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
@@ -83,12 +81,10 @@ public class PingProcess
         if (startInfo == null)
             throw new ArgumentNullException(nameof(startInfo));
 
-        // Use Task.Factory.StartNew for long-running task
         Task<PingResult> task = Task.Factory.StartNew(() =>
         {
             token.ThrowIfCancellationRequested();
 
-            // Capture all output lines
             StringBuilder stringBuilder = new();
             void captureOutput(string? line)
             {
@@ -100,7 +96,6 @@ public class PingProcess
                     }
                 }
 
-                // Also invoke user-provided callback
                 progressOutput?.Invoke(line);
             }
 
@@ -109,10 +104,8 @@ public class PingProcess
                 progressError?.Invoke(line);
             }
 
-            // Run the process using helper
             Process process = RunProcessInternal(startInfo, captureOutput, captureError, token);
 
-            // Build PingResult
             int exitCode = process.ExitCode;
             string? output = stringBuilder.ToString();
 
