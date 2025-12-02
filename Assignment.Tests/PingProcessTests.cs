@@ -118,8 +118,8 @@ public class PingProcessTests
         catch (AggregateException ex)
         {
             Exception? inner = ex.Flatten().InnerException;
-            Assert.IsInstanceOfType(inner, typeof(TaskCanceledException));
-        // Use exception.Flatten()
+            Assert.IsInstanceOfType<TaskCanceledException>(inner);
+            // Use exception.Flatten()
         }
     }
 
