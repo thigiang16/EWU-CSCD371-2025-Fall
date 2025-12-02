@@ -48,7 +48,7 @@ public class PingProcess
         IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
         if (hostNameOrAddresses == null)
-            throw new ArgumentNullException(nameof(hostNameOrAddresses));
+            ArgumentNullException.ThrowIfNull(hostNameOrAddresses);
 
         StringBuilder stringBuilder = new StringBuilder();
         Object lockObject = new Object();
@@ -79,7 +79,7 @@ public class PingProcess
         Action<string?>? progressError, CancellationToken token)
     {
         if (startInfo == null)
-            throw new ArgumentNullException(nameof(startInfo));
+            ArgumentNullException.ThrowIfNull(startInfo);
 
         Task<PingResult> task = Task.Factory.StartNew(() =>
         {
@@ -119,7 +119,7 @@ public class PingProcess
     // extra credit
     public async Task<PingResult> RunAsync(IProgress<string?> progress)
     {
-        if (progress == null) throw new ArgumentNullException(nameof(progress));
+        if (progress == null) ArgumentNullException.ThrowIfNull(progress);
 
         StringBuilder outputBuilder = new();
         void captureLine(string? line)
