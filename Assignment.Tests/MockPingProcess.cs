@@ -55,7 +55,7 @@ Approximate round trip times in milli-seconds:
     private string[] GenerateLines(string host)
     {
         string[] lines = _pingTemplate.Split(Environment.NewLine, StringSplitOptions.None);
-        if (lines.Length > 0 && lines[0].Contains("*"))
+        if (lines.Length > 0 && lines[0].Contains('*'))
         {
             lines[0] = lines[0].Replace("*", host);
         }
