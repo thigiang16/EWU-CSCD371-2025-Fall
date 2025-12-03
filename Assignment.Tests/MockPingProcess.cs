@@ -14,6 +14,7 @@ Reply from ::1: time<1ms
 Reply from ::1: time<1ms
 Reply from ::1: time<1ms
 Reply from ::1: time<1ms
+
 Ping statistics for ::1:
     Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
 Approximate round trip times in milli-seconds:
@@ -28,7 +29,7 @@ Approximate round trip times in milli-seconds:
         // simulate network delay
         Task.Delay(400, cancellationToken).Wait(cancellationToken);
 
-        string host = startInfo.Arguments ?? "localhost";
+        string host = startInfo.Arguments?.Split(' ')[0] ?? "localhost";
 
         // simulate a host not found
         if (host.Equals("badaddress", StringComparison.OrdinalIgnoreCase))
