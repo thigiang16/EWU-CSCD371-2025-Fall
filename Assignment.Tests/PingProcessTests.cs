@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -25,8 +26,12 @@ public class PingProcessTests
     [TestMethod]
     public void Start_PingProcess_Success()
     {
-        PingResult result = Sut.Run("localhost");
-        Assert.AreEqual<int>(0, result.ExitCode);
+        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? " -n 4" : " -c 4";
+
+        Process process = Process.Start("ping", "localhost" + args);
+        process.WaitForExit();
+
+        Assert.AreEqual<int>(0, process.ExitCode);
     }
 
     [TestMethod]

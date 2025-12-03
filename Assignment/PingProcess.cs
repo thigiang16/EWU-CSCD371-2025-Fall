@@ -18,9 +18,9 @@ public class PingProcess
 
     public PingResult Run(string hostNameOrAddress)
     {
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? " -n 4" : " -c 4";
 
-        StartInfo.Arguments = isWindows ? hostNameOrAddress : $"-c 4 {hostNameOrAddress}";
+        StartInfo.Arguments = hostNameOrAddress + args;
 
         StringBuilder? stringBuilder = null;
         void updateStdOutput(string? line) =>
