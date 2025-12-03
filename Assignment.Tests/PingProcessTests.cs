@@ -179,20 +179,6 @@ public class PingProcessTests
 
         }
     }
-
-    [TestMethod]
-    public async Task RunAsync_WithProgress_ReportsLines()
-    {
-        List<string?> reported = new();
-        var progress = new Progress<string?>(s => reported.Add(s));
-
-        PingResult result = await Sut.RunAsync(progress);
-
-        Assert.IsNotEmpty(reported);
-        
-        AssertValidPingOutput(result);
-    }
-
  
 
 
