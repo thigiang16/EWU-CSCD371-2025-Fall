@@ -14,7 +14,6 @@ public record struct PingResult(int ExitCode, string? StdOutput);
 
 public class PingProcess
 {
-    private ProcessStartInfo StartInfo { get; } = new("ping");
 
     public PingResult Run(string hostNameOrAddress)
     {
