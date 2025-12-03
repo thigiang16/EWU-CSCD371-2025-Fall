@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Assignment;
 
@@ -17,7 +18,13 @@ public class PingProcess
 
     public PingResult Run(string hostNameOrAddress)
     {
-        StartInfo.Arguments = hostNameOrAddress;
+        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        string args = isWindows
+            ? $"{hostNameOrAddress}" 
+            : $"-c 4 {hostNameOrAddress}";
+
+        StartInfo.Arguments = args;
         StringBuilder? stringBuilder = null;
         void updateStdOutput(string? line) =>
             (stringBuilder ??= new StringBuilder()).AppendLine(line);
