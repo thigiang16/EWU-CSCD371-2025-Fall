@@ -15,12 +15,12 @@ namespace Assignment.Tests;
 [TestClass]
 public class PingProcessTests
 {
-    PingProcess Sut { get; set; } = new();
+    PingProcess Sut { get; set; } = new MockPingProcess();
 
     [TestInitialize]
     public void TestInitialize()
     {
-        Sut = new();
+        Sut = new MockPingProcess();
     }
 
     [TestMethod]

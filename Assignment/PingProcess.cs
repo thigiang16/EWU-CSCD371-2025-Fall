@@ -16,23 +16,24 @@ public class PingProcess
 {
     private ProcessStartInfo StartInfo { get; } = new("ping");
 
-    public virtual PingResult Run(string hostNameOrAddress)
+    public PingResult Run(string hostNameOrAddress)
     {
-        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "-n 4" : "-c 4";
+        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? " -n 4" : " -c 4";
 
-        StartInfo.Arguments = hostNameOrAddress + " " + args;
+        ProcessStartInfo info = new("ping")
+        {
+            Arguments = hostNameOrAddress + args
+        };
 
         StringBuilder? stringBuilder = null;
         void updateStdOutput(string? line) =>
             (stringBuilder ??= new StringBuilder()).AppendLine(line);
 
-        Process process = RunProcessInternal(StartInfo, updateStdOutput, default, default);
-
-        int exitCode = process.ExitCode;
-        if (exitCode != 0) exitCode = 1;
+        int exitCode = RunProcessInternal(info, updateStdOutput, default, default);
 
         return new PingResult(exitCode, stringBuilder?.ToString());
     }
+
 
     public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
     {
@@ -108,9 +109,8 @@ public class PingProcess
                 progressError?.Invoke(line);
             }
 
-            Process process = RunProcessInternal(startInfo, captureOutput, captureError, token);
+            int exitCode = RunProcessInternal(startInfo, captureOutput, captureError, token);
 
-            int exitCode = process.ExitCode;
             if (exitCode != 0) exitCode = 1;
 
             string? output = stringBuilder.ToString();
@@ -144,16 +144,15 @@ public class PingProcess
         return await Task.Run(() =>
         {
             ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
-            Process process = RunProcessInternal(startInfo, captureLine, null, default);
+            int exitCode = RunProcessInternal(startInfo, captureLine, null, default);
 
-            int exitCode = process.ExitCode;
             if (exitCode != 0) exitCode = 1; // normalize exit code
 
             return new PingResult(exitCode, outputBuilder.ToString());
         });
     }
 
-    private Process RunProcessInternal(
+    protected virtual int RunProcessInternal(
         ProcessStartInfo startInfo,
         Action<string?>? progressOutput,
         Action<string?>? progressError,
@@ -166,11 +165,11 @@ public class PingProcess
         return RunProcessInternal(process, progressOutput, progressError, token);
     }
 
-    private Process RunProcessInternal(
-        Process process,
-        Action<string?>? progressOutput,
-        Action<string?>? progressError,
-        CancellationToken token)
+    private int RunProcessInternal(
+         Process process,
+         Action<string?>? progressOutput,
+         Action<string?>? progressError,
+         CancellationToken token)
     {
         process.EnableRaisingEvents = true;
         process.OutputDataReceived += OutputHandler;
@@ -180,7 +179,7 @@ public class PingProcess
         {
             if (!process.Start())
             {
-                return process;
+                return process.ExitCode;
             }
 
             token.Register(obj =>
@@ -198,16 +197,21 @@ public class PingProcess
                 }
             }, process);
 
+
             if (process.StartInfo.RedirectStandardOutput)
+            {
                 process.BeginOutputReadLine();
+            }
             if (process.StartInfo.RedirectStandardError)
+            {
                 process.BeginErrorReadLine();
+            }
 
             if (process.HasExited)
             {
-                return process;
+                return process.ExitCode;
             }
-                process.WaitForExit();
+            process.WaitForExit();
         }
         catch (Exception e)
         {
@@ -216,21 +220,33 @@ public class PingProcess
         finally
         {
             if (process.StartInfo.RedirectStandardError)
+            {
                 process.CancelErrorRead();
+            }
             if (process.StartInfo.RedirectStandardOutput)
+            {
                 process.CancelOutputRead();
-            
+            }
             process.OutputDataReceived -= OutputHandler;
             process.ErrorDataReceived -= ErrorHandler;
 
             if (!process.HasExited)
+            {
                 process.Kill();
+            }
+
+        }
+        return process.ExitCode;
+
+        void OutputHandler(object s, DataReceivedEventArgs e)
+        {
+            progressOutput?.Invoke(e.Data);
         }
 
-        return process;
-
-        void OutputHandler(object s, DataReceivedEventArgs e) => progressOutput?.Invoke(e.Data);
-        void ErrorHandler(object s, DataReceivedEventArgs e) => progressError?.Invoke(e.Data);
+        void ErrorHandler(object s, DataReceivedEventArgs e)
+        {
+            progressError?.Invoke(e.Data);
+        }
     }
 
     private static ProcessStartInfo UpdateProcessStartInfo(ProcessStartInfo startInfo)
