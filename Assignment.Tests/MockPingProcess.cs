@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assignment.Tests;
 
-internal sealed class MockPingProcess : PingProcess
+public sealed class MockPingProcess : PingProcess
 {
     private readonly string _pingTemplate = @"
 Pinging * with 32 bytes of data:
