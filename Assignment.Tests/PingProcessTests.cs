@@ -25,9 +25,8 @@ public class PingProcessTests
     [TestMethod]
     public void Start_PingProcess_Success()
     {
-        Process process = Process.Start("ping", "localhost");
-        process.WaitForExit();
-        Assert.AreEqual<int>(0, process.ExitCode);
+        PingResult result = Sut.Run("localhost");
+        Assert.AreEqual<int>(0, result.ExitCode);
     }
 
     [TestMethod]
