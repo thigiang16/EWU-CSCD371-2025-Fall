@@ -16,11 +16,11 @@ public class PingProcess
 {
     private ProcessStartInfo StartInfo { get; } = new("ping");
 
-    public PingResult Run(string hostNameOrAddress)
+    public virtual PingResult Run(string hostNameOrAddress)
     {
-        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? " -n 4" : " -c 4";
+        string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "-n 4" : "-c 4";
 
-        StartInfo.Arguments = hostNameOrAddress + args;
+        StartInfo.Arguments = hostNameOrAddress + " " + args;
 
         StringBuilder? stringBuilder = null;
         void updateStdOutput(string? line) =>
@@ -28,7 +28,10 @@ public class PingProcess
 
         Process process = RunProcessInternal(StartInfo, updateStdOutput, default, default);
 
-        return new PingResult(process.ExitCode, stringBuilder?.ToString());
+        int exitCode = process.ExitCode;
+        if (exitCode != 0) exitCode = 1;
+
+        return new PingResult(exitCode, stringBuilder?.ToString());
     }
 
     public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
@@ -38,26 +41,22 @@ public class PingProcess
             return Run(hostNameOrAddress);
         });
     }
-    
-    async public Task<PingResult> RunAsync(
-        string hostNameOrAddress, CancellationToken cancellationToken = default)
+
+    async public Task<PingResult> RunAsync(string hostNameOrAddress, CancellationToken cancellationToken = default)
     {
-        PingResult result = await Task.Run(() =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Run(hostNameOrAddress);
-        }, cancellationToken);
+        Task<PingResult> task = RunTaskAsync(hostNameOrAddress);
+        PingResult result = await task.WaitAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
         return result;
     }
 
-    async public Task<PingResult> RunAsync(
-        IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
+    async public Task<PingResult> RunAsync(IEnumerable<string> hostNameOrAddresses, CancellationToken cancellationToken = default)
     {
-        if (hostNameOrAddresses == null)
-            ArgumentNullException.ThrowIfNull(hostNameOrAddresses);
+        ArgumentNullException.ThrowIfNull(hostNameOrAddresses);
 
-        StringBuilder stringBuilder = new StringBuilder();
-        Object lockObject = new Object();
+        StringBuilder stringBuilder = new();
+        object lockObject = new();
+
         IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -84,8 +83,7 @@ public class PingProcess
         ProcessStartInfo startInfo, Action<string?>? progressOutput,
         Action<string?>? progressError, CancellationToken token)
     {
-        if (startInfo == null)
-            ArgumentNullException.ThrowIfNull(startInfo);
+        ArgumentNullException.ThrowIfNull(startInfo);
 
         Task<PingResult> task = Task.Factory.StartNew(() =>
         {
@@ -113,6 +111,8 @@ public class PingProcess
             Process process = RunProcessInternal(startInfo, captureOutput, captureError, token);
 
             int exitCode = process.ExitCode;
+            if (exitCode != 0) exitCode = 1;
+
             string? output = stringBuilder.ToString();
 
             return new PingResult(exitCode, output);
@@ -125,7 +125,7 @@ public class PingProcess
     // extra credit
     public async Task<PingResult> RunAsync(IProgress<string?> progress)
     {
-        if (progress == null) ArgumentNullException.ThrowIfNull(progress);
+        ArgumentNullException.ThrowIfNull(progress);
 
         StringBuilder outputBuilder = new();
         void captureLine(string? line)
@@ -146,10 +146,12 @@ public class PingProcess
             ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
             Process process = RunProcessInternal(startInfo, captureLine, null, default);
 
-            return new PingResult(process.ExitCode, outputBuilder.ToString());
+            int exitCode = process.ExitCode;
+            if (exitCode != 0) exitCode = 1; // normalize exit code
+
+            return new PingResult(exitCode, outputBuilder.ToString());
         });
     }
-
 
     private Process RunProcessInternal(
         ProcessStartInfo startInfo,
@@ -196,21 +198,16 @@ public class PingProcess
                 }
             }, process);
 
-
             if (process.StartInfo.RedirectStandardOutput)
-            {
                 process.BeginOutputReadLine();
-            }
             if (process.StartInfo.RedirectStandardError)
-            {
                 process.BeginErrorReadLine();
-            }
 
             if (process.HasExited)
             {
                 return process;
             }
-            process.WaitForExit();
+                process.WaitForExit();
         }
         catch (Exception e)
         {
@@ -219,33 +216,21 @@ public class PingProcess
         finally
         {
             if (process.StartInfo.RedirectStandardError)
-            {
                 process.CancelErrorRead();
-            }
             if (process.StartInfo.RedirectStandardOutput)
-            {
                 process.CancelOutputRead();
-            }
+            
             process.OutputDataReceived -= OutputHandler;
             process.ErrorDataReceived -= ErrorHandler;
 
             if (!process.HasExited)
-            {
                 process.Kill();
-            }
-
         }
+
         return process;
 
-        void OutputHandler(object s, DataReceivedEventArgs e)
-        {
-            progressOutput?.Invoke(e.Data);
-        }
-
-        void ErrorHandler(object s, DataReceivedEventArgs e)
-        {
-            progressError?.Invoke(e.Data);
-        }
+        void OutputHandler(object s, DataReceivedEventArgs e) => progressOutput?.Invoke(e.Data);
+        void ErrorHandler(object s, DataReceivedEventArgs e) => progressError?.Invoke(e.Data);
     }
 
     private static ProcessStartInfo UpdateProcessStartInfo(ProcessStartInfo startInfo)
