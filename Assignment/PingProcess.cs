@@ -78,52 +78,33 @@ public class PingProcess
         return new PingResult(totalExitCode, combinedOutput);
     }
 
-    public Task<PingResult> RunLongRunningAsync(
-        ProcessStartInfo startInfo, Action<string?>? progressOutput,
-        Action<string?>? progressError, CancellationToken token)
+    public Task<int> RunLongRunningAsync(
+                        ProcessStartInfo startInfo,
+                        Action<string?>? progressOutput,
+                        Action<string?>? progressError,
+                        CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(startInfo);
 
-        Task<PingResult> task = Task.Factory.StartNew(() =>
-        {
-            token.ThrowIfCancellationRequested();
+        return Task.Factory.StartNew(() =>
+        { 
+            return RunProcessInternal(startInfo, progressOutput, progressError, token);
 
-            StringBuilder stringBuilder = new();
-            void captureOutput(string? line)
-            {
-                if (!string.IsNullOrEmpty(line))
-                {
-                    lock (stringBuilder)
-                    {
-                        stringBuilder.AppendLine(line);
-                    }
-                }
-
-                progressOutput?.Invoke(line);
-            }
-
-            void captureError(string? line)
-            {
-                progressError?.Invoke(line);
-            }
-
-            int exitCode = RunProcessInternal(startInfo, captureOutput, captureError, token);
-
-            if (exitCode != 0) exitCode = 1;
-
-            string? output = stringBuilder.ToString();
-
-            return new PingResult(exitCode, output);
-
-        }, token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-
-        return task;
+        },
+        token,
+        TaskCreationOptions.LongRunning,
+        TaskScheduler.Current);
     }
 
+
     // extra credit
-    public async Task<PingResult> RunAsync(IProgress<string?> progress)
+    public async Task<PingResult> RunAsync(
+        string hostNameOrAddresses, 
+        IProgress<string?> progress, 
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(progress);
+        ArgumentNullException.ThrowIfNull(hostNameOrAddresses);
 
         StringBuilder outputBuilder = new();
         void captureLine(string? line)
@@ -141,10 +122,10 @@ public class PingProcess
 
         return await Task.Run(() =>
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
-            int exitCode = RunProcessInternal(startInfo, captureLine, null, default);
+            ProcessStartInfo startInfo = new ProcessStartInfo("ping", hostNameOrAddresses);
+            int exitCode = RunProcessInternal(startInfo, captureLine, null, cancellationToken);
 
-            if (exitCode != 0) exitCode = 1; // normalize exit code
+            if (exitCode != 0) exitCode = 1;
 
             return new PingResult(exitCode, outputBuilder.ToString());
         });

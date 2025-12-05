@@ -150,17 +150,40 @@ public class PingProcessTests
     async public Task RunLongRunningAsync_UsingTpl_Success()
     {
         ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
-        StringBuilder outputBuilder = new();
+        StringBuilder output = new();
+        StringBuilder error = new();
 
-        PingResult result = await Sut.RunLongRunningAsync(
+        using CancellationTokenSource cts = new();
+
+        int exitCode = await Sut.RunLongRunningAsync(
             startInfo,
-            null,
-            null,
-            CancellationToken.None
-        );
+            line => { if (line is not null) output.AppendLine(line); },
+            line => { if (line is not null) error.AppendLine(line); },
+            cts.Token);
 
-        Assert.AreEqual<int>(0, result.ExitCode);
+        AssertValidPingOutput(exitCode, output.ToString());
+        Assert.AreEqual<string>(string.Empty, error.ToString().Trim());
     }
+
+    [TestMethod]
+    public async Task RunAsync_WithProgress_CapturesOutputAsItOccurs()
+    {
+        List<string> capturedLines = new();
+
+        IProgress<string?> progress = new Progress<string?>(line =>
+        {
+            if (!string.IsNullOrEmpty(line))
+            {
+                capturedLines.Add(line);
+            }
+        });
+
+        PingResult result = await Sut.RunAsync("localhost", progress);
+
+        AssertValidPingOutput(result);
+  
+    }
+
 
     [TestMethod]
     public void StringBuilderAppendLine_InParallel_IsNotThreadSafe()
