@@ -194,12 +194,12 @@ public class PingProcessTests
             System.Text.StringBuilder stringBuilder = new();
             numbers.AsParallel().ForAll(item => stringBuilder.AppendLine(""));
             int lineCount = stringBuilder.ToString().Split(Environment.NewLine).Length;
-            Assert.AreNotEqual<int>(lineCount, numbers.Count() + 1);
+            Assert.AreNotEqual<int>(lineCount, numbers.Count() + 1,
+                "Expected line count to be incorrect due to non-thread-safe StringBuilder.");
         }
-
-        catch (AggregateException)
+        catch (AggregateException ex)
         {
-
+            Assert.Fail("Parallel execution caused an unexpected AggregateException: " + ex);
         }
     }
  
