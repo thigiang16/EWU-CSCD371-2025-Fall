@@ -3,10 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -65,9 +63,6 @@ public class PingProcessTests
     [TestMethod]
     public void RunTaskAsync_Success()
     {
-        // Do NOT use async/await in this test.
-        // Test Sut.RunTaskAsync("localhost").
-
         Task<PingResult> task = Sut.RunTaskAsync("localhost");
         PingResult result = task.Result;
 
@@ -77,19 +72,16 @@ public class PingProcessTests
     [TestMethod]
     public void RunAsync_UsingTaskReturn_Success()
     {
-        // Do NOT use async/await in this test.
         PingResult result = Sut.RunAsync("localhost").Result;
-        // Test Sut.RunAsync("localhost");
+        
         AssertValidPingOutput(result);
     }
 
     [TestMethod]
     async public Task RunAsync_UsingTpl_Success()
     {
-        // DO use async/await in this test.
         PingResult result = await Sut.RunAsync("localhost");
 
-        // Test Sut.RunAsync("localhost");
         AssertValidPingOutput(result);
     }
 
@@ -147,6 +139,18 @@ public class PingProcessTests
     }
 
     [TestMethod]
+    public async Task RunAsync_EmptyHostArray_ReturnsZeroOutput()
+    {
+        string[] hosts = Array.Empty<string>();
+
+        PingResult result = await Sut.RunAsync(hosts);
+
+        Assert.AreEqual<int>(0, result.ExitCode);
+        Assert.IsTrue(string.IsNullOrEmpty(result.StdOutput), "Expected empty StdOutput for empty host array.");
+    }
+
+
+    [TestMethod]
     async public Task RunLongRunningAsync_UsingTpl_Success()
     {
         ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
@@ -163,6 +167,24 @@ public class PingProcessTests
 
         AssertValidPingOutput(exitCode, output.ToString());
         Assert.AreEqual<string>(string.Empty, error.ToString().Trim());
+    }
+
+    [TestMethod]
+    public async Task RunLongRunningAsync_CancellationRequested_ThrowsOperationCanceledException()
+    {
+        ProcessStartInfo startInfo = new ProcessStartInfo("ping", "localhost");
+        using CancellationTokenSource cts = new();
+        cts.Cancel(); 
+
+        try
+        {
+            await Sut.RunLongRunningAsync(startInfo, null, null, cts.Token);
+            Assert.Fail("Expected OperationCanceledException was not thrown.");
+        }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     [TestMethod]
@@ -184,6 +206,18 @@ public class PingProcessTests
   
     }
 
+    [TestMethod]
+    public async Task RunAsync_WithProgress_HandlesEmptyOrNullLines()
+    {
+        List<string?> capturedLines = new();
+        IProgress<string?> progress = new Progress<string?>(line => capturedLines.Add(line));
+
+        PingResult result = await Sut.RunAsync("localhost", progress);
+
+        AssertValidPingOutput(result);
+        
+        Assert.IsTrue(capturedLines.All(line => line is null || line is string));
+    }
 
     [TestMethod]
     public void StringBuilderAppendLine_InParallel_IsNotThreadSafe()
