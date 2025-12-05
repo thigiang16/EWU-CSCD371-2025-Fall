@@ -15,7 +15,7 @@ public record struct PingResult(int ExitCode, string? StdOutput);
 public class PingProcess
 {
 
-    public PingResult Run(string hostNameOrAddress)
+    public PingResult Run(string hostNameOrAddress, CancellationToken cancellationToken = default )
     {
         string args = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? " -n 4" : " -c 4";
 
@@ -28,23 +28,20 @@ public class PingProcess
         void updateStdOutput(string? line) =>
             (stringBuilder ??= new StringBuilder()).AppendLine(line);
 
-        int exitCode = RunProcessInternal(info, updateStdOutput, default, default);
+        int exitCode = RunProcessInternal(info, updateStdOutput, default, cancellationToken);
 
         return new PingResult(exitCode, stringBuilder?.ToString());
     }
 
 
-    public Task<PingResult> RunTaskAsync(string hostNameOrAddress)
+    public Task<PingResult> RunTaskAsync(string hostNameOrAddress, CancellationToken cancellationToken = default)
     {
-        return Task.Run(() =>
-        {
-            return Run(hostNameOrAddress);
-        });
+        return Task.Run(() => Run(hostNameOrAddress, cancellationToken));
     }
 
     async public Task<PingResult> RunAsync(string hostNameOrAddress, CancellationToken cancellationToken = default)
     {
-        Task<PingResult> task = RunTaskAsync(hostNameOrAddress);
+        Task<PingResult> task = RunTaskAsync(hostNameOrAddress, cancellationToken);
         PingResult result = await task.WaitAsync(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
         return result;
@@ -57,10 +54,10 @@ public class PingProcess
         StringBuilder stringBuilder = new();
         object lockObject = new();
 
-        IEnumerable<Task<int>> tasks = hostNameOrAddresses.Select(host => Task.Run(() =>
+        Task<int>[] tasks = hostNameOrAddresses.Select(async host =>
         {
             cancellationToken.ThrowIfCancellationRequested();
-            PingResult result = Run(host);
+            PingResult result = await RunAsync(host, cancellationToken);
 
             string output = result.StdOutput?.Trim() ?? string.Empty;
             if (!string.IsNullOrEmpty(output))
@@ -72,11 +69,13 @@ public class PingProcess
             }
 
             return result.ExitCode;
-        }, cancellationToken)).ToList();
+        }).ToArray();
 
         int[] results = await Task.WhenAll(tasks);
-        int totalExitCode = results.Sum();
-        return new PingResult(totalExitCode, stringBuilder.ToString());
+        int totalExitCode = results.Any(code => code != 0) ? 1 : 0;
+        string? combinedOutput = stringBuilder.Length > 0 ? stringBuilder.ToString() : null;
+
+        return new PingResult(totalExitCode, combinedOutput);
     }
 
     public Task<PingResult> RunLongRunningAsync(

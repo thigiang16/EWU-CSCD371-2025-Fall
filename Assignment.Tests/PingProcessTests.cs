@@ -15,7 +15,7 @@ namespace Assignment.Tests;
 [TestClass]
 public class PingProcessTests
 {
-    PingProcess Sut { get; set; } = new MockPingProcess();
+    MockPingProcess Sut { get; set; } = new();
 
     [TestInitialize]
     public void TestInitialize()
@@ -101,7 +101,7 @@ public class PingProcessTests
         using CancellationTokenSource cts = new();
         cts.Cancel();
 
-        Assert.Throws<AggregateException>(() =>
+        Assert.ThrowsExactly<AggregateException>(() =>
         {
             Sut.RunAsync("localhost", cts.Token).Wait();
         });
@@ -143,7 +143,7 @@ public class PingProcessTests
                               .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
                               .Length ?? 0;
 
-        Assert.AreEqual(expectedLineCount, actualLineCount);
+        Assert.AreEqual<int>(expectedLineCount, actualLineCount);
     }
 
     [TestMethod]
@@ -171,7 +171,7 @@ public class PingProcessTests
             System.Text.StringBuilder stringBuilder = new();
             numbers.AsParallel().ForAll(item => stringBuilder.AppendLine(""));
             int lineCount = stringBuilder.ToString().Split(Environment.NewLine).Length;
-            Assert.AreNotEqual(lineCount, numbers.Count() + 1);
+            Assert.AreNotEqual<int>(lineCount, numbers.Count() + 1);
         }
 
         catch (AggregateException)
